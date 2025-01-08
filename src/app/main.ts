@@ -1,38 +1,57 @@
 import { drawFunctionArgumants } from "../components/AppBody";
-import { white } from "./setaps/colorama/colors";
-import { drawDozens } from "./setaps/drawer/numbers";
+import getNewFigur from "./controlers/getNewFigur";
+import Mover from "./controlers/Mover";
+import isDeepEqualInBy from "./equal/isDeepEqualInBy";
+import Figure, { FigureConstructor } from "./figures/Figure";
+import Glass from "./glass/Glass";
 
 export const before = ({ matrix }: drawFunctionArgumants) => {
   matrix.off();
+  glass = new Glass(matrix);
+  mover = new Mover(glass);
 };
 
-let frameCounter = 0;
-let iterator = 0;
+let glass: Glass;
+let mover: Mover;
+const pixelsInGlass: FigureConstructor[] = [];
+const fallingFigures: Figure[] = [];
 
-export const draw = ({ matrix }: drawFunctionArgumants) => {
+export const draw = ({ matrix, pressNow }: drawFunctionArgumants) => {
   matrix.off();
 
-  drawDozens(
-    matrix,
-    iterator, // Цифра яка буде намальована,
-    {
-      position: {
-        x: matrix.columns / 2 - 5,
-        y: matrix.rows / 2 - 4,
-      }, //Позиція відносно лівого верхнього кута
-      fill: white, //Колір цифр
+  if (fallingFigures.length === 0) {
+    fallingFigures.push(getNewFigur());
+  }
+
+  fallingFigures.forEach((figur) => {
+    figur.goDown();
+    const currentFigur = figur.getState();
+    currentFigur.forEach((cell) => {
+      matrix.drawer.drawPixel(cell.position, cell.fill);
+    });
+
+    if (pressNow) {
+      mover.move(figur, pressNow);
+
+      mover.rotate(figur, pressNow);
     }
-  );
 
-  // Треба домножати на те скільки секунд треба чекати
-  if (frameCounter === matrix.fps * 1) {
-    iterator++;
-    frameCounter = 0;
-  }
+    const nextState = figur.nextStep();
 
-  if (iterator > 99) {
-    iterator = 0;
-  }
+    nextState.forEach((cell) => {
+      if (
+        glass.isFloor(cell.position) ||
+        isDeepEqualInBy(pixelsInGlass, cell, ["position"])
+      ) {
+        currentFigur.forEach((cell) => {
+          pixelsInGlass.push(cell);
+        });
+        fallingFigures.pop();
+      }
+    });
+  });
 
-  frameCounter++;
+  pixelsInGlass.forEach((cell) => {
+    matrix.drawer.drawPixel(cell.position, cell.fill);
+  });
 };

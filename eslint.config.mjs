@@ -22,6 +22,7 @@ const eslintConfig = [
       semi: ["error", "always"],
       "react-hooks/exhaustive-deps": "off",
       "react/react-in-jsx-scope": "off",
+      "no-explicit-any": "off",
     },
   },
 ];

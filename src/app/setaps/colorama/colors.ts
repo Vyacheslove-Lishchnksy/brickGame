@@ -54,3 +54,7 @@ export const turquoise: backgroundColor = convertHexToPixelColor({
   green: "ff",
   blue: "ff",
 });
+
+export const matrixoff: backgroundColor = {
+  background: `rgba(${23}, ${23}, ${23}, ${1})`,
+};
