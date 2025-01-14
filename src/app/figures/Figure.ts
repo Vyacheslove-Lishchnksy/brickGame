@@ -142,7 +142,7 @@ class Figure {
   }
 }
 
-export interface FigureConstructor extends Record<string, unknown> {
+export interface FigureConstructor extends Record<string, any> {
   position: Coordinate2D;
   fill: backgroundColor;
 }

@@ -1,25 +1,33 @@
-export function isDeepEqual(
-  obj1: Record<string, any>,
-  obj2: Record<string, any>
-) {
-  let resault = { value: true };
+export function isDeepEqual<T extends Record<string, any>>(
+  obj1: T,
+  obj2: T
+): boolean {
+  const result = { value: true };
 
-  compareObjects(obj1, obj2, resault);
+  compareObjects(obj1, obj2, result);
 
-  return resault.value;
+  return result.value;
 }
 
-function compareObjects(
-  obj1: Record<string, any>,
-  obj2: Record<string, any>,
+function compareObjects<T extends Record<string, any>>(
+  obj1: T,
+  obj2: T,
   result: { value: boolean }
-) {
+): void {
   const contentOfObj1 = Object.entries(obj1);
 
   if (contentOfObj1.length === Object.keys(obj2).length && result.value) {
     contentOfObj1.forEach(([key, value]) => {
-      if (typeof value === "object" && !Object.is(value, null)) {
-        compareObjects(value, obj2[key], result);
+      if (typeof value === "object" && value !== null) {
+        if (typeof obj2[key] === "object" && obj2[key] !== null) {
+          compareObjects(
+            value as Record<string, any>,
+            obj2[key] as Record<string, any>,
+            result
+          );
+        } else {
+          result.value = false;
+        }
       } else {
         if (!result.value) {
           return;
@@ -30,6 +38,5 @@ function compareObjects(
     });
   } else {
     result.value = false;
-    return;
   }
 }

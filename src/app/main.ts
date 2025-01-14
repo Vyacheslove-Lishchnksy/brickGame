@@ -1,19 +1,24 @@
 import { drawFunctionArgumants } from "../components/AppBody";
 import getNewFigur from "./controlers/getNewFigur";
 import Mover from "./controlers/Mover";
+import getDeepUniqValue from "./equal/getDeepUniqValue";
 import isDeepEqualInBy from "./equal/isDeepEqualInBy";
 import Figure, { FigureConstructor } from "./figures/Figure";
 import Glass from "./glass/Glass";
+import Render from "./render/Render";
 
 export const before = ({ matrix }: drawFunctionArgumants) => {
   matrix.off();
   glass = new Glass(matrix);
   mover = new Mover(glass);
+  render = new Render(matrix);
 };
 
 let glass: Glass;
 let mover: Mover;
-const pixelsInGlass: FigureConstructor[] = [];
+let render: Render;
+let isPause: boolean;
+let pixelsInGlass: FigureConstructor[] = [];
 const fallingFigures: Figure[] = [];
 
 export const draw = ({ matrix, pressNow }: drawFunctionArgumants) => {
@@ -33,6 +38,16 @@ export const draw = ({ matrix, pressNow }: drawFunctionArgumants) => {
     if (pressNow) {
       mover.move(figur, pressNow);
 
+      if (pressNow === "KeyP") {
+        if (isPause) {
+          figur.unfrreze();
+          isPause = false;
+        } else {
+          figur.frreze();
+          isPause = true;
+        }
+      }
+
       mover.rotate(figur, pressNow);
     }
 
@@ -50,6 +65,8 @@ export const draw = ({ matrix, pressNow }: drawFunctionArgumants) => {
       }
     });
   });
+  render.getAllFullRows(pixelsInGlass);
+  // console.log(render.getAllFullRows(pixelsInGlass));
 
   pixelsInGlass.forEach((cell) => {
     matrix.drawer.drawPixel(cell.position, cell.fill);
